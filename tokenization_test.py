@@ -23,7 +23,7 @@ import tensorflow as tf
 import tokenization
 
 
-class TokenizationTest(tf.test.TestCase):
+class TokenizationTest(tf.compat.v1.test.TestCase):
 
   def test_full_tokenizer(self):
     vocab_tokens = [
@@ -133,4 +133,4 @@ class TokenizationTest(tf.test.TestCase):
 
 
 if __name__ == "__main__":
-  tf.test.main()
+  tf.compat.v1.test.main()

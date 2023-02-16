@@ -17,15 +17,15 @@ def precision(labels, predictions, num_classes, pos_indices=None,
     """Multi-class precision metric for Tensorflow
     Parameters
     ----------
-    labels : Tensor of tf.int32 or tf.int64
+    labels : Tensor of tf.compat.v1.int32 or tf.compat.v1.int64
         The true labels
-    predictions : Tensor of tf.int32 or tf.int64
+    predictions : Tensor of tf.compat.v1.int32 or tf.compat.v1.int64
         The predictions, same shape as labels
     num_classes : int
         The number of classes
     pos_indices : list of int, optional
         The indices of the positive classes, default is all
-    weights : Tensor of tf.int32, optional
+    weights : Tensor of tf.compat.v1.int32, optional
         Mask, must be of compatible shape with labels
     average : str, optional
         'micro': counts the total number of true positives, false
@@ -55,15 +55,15 @@ def recall(labels, predictions, num_classes, pos_indices=None, weights=None,
     """Multi-class recall metric for Tensorflow
     Parameters
     ----------
-    labels : Tensor of tf.int32 or tf.int64
+    labels : Tensor of tf.compat.v1.int32 or tf.compat.v1.int64
         The true labels
-    predictions : Tensor of tf.int32 or tf.int64
+    predictions : Tensor of tf.compat.v1.int32 or tf.compat.v1.int64
         The predictions, same shape as labels
     num_classes : int
         The number of classes
     pos_indices : list of int, optional
         The indices of the positive classes, default is all
-    weights : Tensor of tf.int32, optional
+    weights : Tensor of tf.compat.v1.int32, optional
         Mask, must be of compatible shape with labels
     average : str, optional
         'micro': counts the total number of true positives, false
@@ -99,15 +99,15 @@ def fbeta(labels, predictions, num_classes, pos_indices=None, weights=None,
     """Multi-class fbeta metric for Tensorflow
     Parameters
     ----------
-    labels : Tensor of tf.int32 or tf.int64
+    labels : Tensor of tf.compat.v1.int32 or tf.compat.v1.int64
         The true labels
-    predictions : Tensor of tf.int32 or tf.int64
+    predictions : Tensor of tf.compat.v1.int32 or tf.compat.v1.int64
         The predictions, same shape as labels
     num_classes : int
         The number of classes
     pos_indices : list of int, optional
         The indices of the positive classes, default is all
-    weights : Tensor of tf.int32, optional
+    weights : Tensor of tf.compat.v1.int32, optional
         Mask, must be of compatible shape with labels
     average : str, optional
         'micro': counts the total number of true positives, false
@@ -136,10 +136,10 @@ def fbeta(labels, predictions, num_classes, pos_indices=None, weights=None,
 
 def safe_div(numerator, denominator):
     """Safe division, return 0 if denominator is 0"""
-    numerator, denominator = tf.to_float(numerator), tf.to_float(denominator)
-    zeros = tf.zeros_like(numerator, dtype=numerator.dtype)
-    denominator_is_zero = tf.equal(denominator, zeros)
-    return tf.where(denominator_is_zero, zeros, numerator / denominator)
+    numerator, denominator = tf.compat.v1.to_float(numerator), tf.compat.v1.to_float(denominator)
+    zeros = tf.compat.v1.zeros_like(numerator, dtype=numerator.dtype)
+    denominator_is_zero = tf.compat.v1.equal(denominator, zeros)
+    return tf.compat.v1.where(denominator_is_zero, zeros, numerator / denominator)
 
 
 def pr_re_fbeta(cm, pos_indices, beta=1):
@@ -148,15 +148,15 @@ def pr_re_fbeta(cm, pos_indices, beta=1):
     neg_indices = [i for i in range(num_classes) if i not in pos_indices]
     cm_mask = np.ones([num_classes, num_classes])
     cm_mask[neg_indices, neg_indices] = 0
-    diag_sum = tf.reduce_sum(tf.diag_part(cm * cm_mask))
+    diag_sum = tf.compat.v1.reduce_sum(tf.compat.v1.diag_part(cm * cm_mask))
 
     cm_mask = np.ones([num_classes, num_classes])
     cm_mask[:, neg_indices] = 0
-    tot_pred = tf.reduce_sum(cm * cm_mask)
+    tot_pred = tf.compat.v1.reduce_sum(cm * cm_mask)
 
     cm_mask = np.ones([num_classes, num_classes])
     cm_mask[neg_indices, :] = 0
-    tot_gold = tf.reduce_sum(cm * cm_mask)
+    tot_gold = tf.compat.v1.reduce_sum(cm * cm_mask)
 
     pr = safe_div(diag_sum, tot_pred)
     re = safe_div(diag_sum, tot_gold)
@@ -170,7 +170,7 @@ def metrics_from_confusion_matrix(cm, pos_indices=None, average='micro',
     """Precision, Recall and F1 from the confusion matrix
     Parameters
     ----------
-    cm : tf.Tensor of type tf.int32, of shape (num_classes, num_classes)
+    cm : tf.compat.v1.Tensor of type tf.compat.v1.int32, of shape (num_classes, num_classes)
         The streaming confusion matrix.
     pos_indices : list of int, optional
         The indices of the positive classes
@@ -194,15 +194,15 @@ def metrics_from_confusion_matrix(cm, pos_indices=None, average='micro',
             fbetas.append(fbeta)
             cm_mask = np.zeros([num_classes, num_classes])
             cm_mask[idx, :] = 1
-            n_golds.append(tf.to_float(tf.reduce_sum(cm * cm_mask)))
+            n_golds.append(tf.compat.v1.to_float(tf.compat.v1.reduce_sum(cm * cm_mask)))
 
         if average == 'macro':
-            pr = tf.reduce_mean(precisions)
-            re = tf.reduce_mean(recalls)
-            fbeta = tf.reduce_mean(fbetas)
+            pr = tf.compat.v1.reduce_mean(precisions)
+            re = tf.compat.v1.reduce_mean(recalls)
+            fbeta = tf.compat.v1.reduce_mean(fbetas)
             return pr, re, fbeta
         if average == 'weighted':
-            n_gold = tf.reduce_sum(n_golds)
+            n_gold = tf.compat.v1.reduce_sum(n_golds)
             pr_sum = sum(p * n for p, n in zip(precisions, n_golds))
             pr = safe_div(pr_sum, n_gold)
             re_sum = sum(r * n for r, n in zip(recalls, n_golds))
